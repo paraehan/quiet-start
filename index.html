@@ -1,0 +1,966 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Quiet Start">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#f7f3ea">
+  <title>Quiet Start</title>
+  <style>
+    :root {
+      --paper: #f7f3ea;
+      --ink: #24231f;
+      --muted: #706d64;
+      --line: #ddd5c6;
+      --soft: #ece4d4;
+      --accent: #2f6f73;
+      --accent-dark: #20565a;
+      --quiet: #fffaf0;
+      --warn: #8b4b2f;
+      --shadow: 0 12px 34px rgba(43, 40, 32, 0.1);
+      color-scheme: light;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: var(--paper);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.52), rgba(255,255,255,0) 240px),
+        var(--paper);
+      color: var(--ink);
+      letter-spacing: 0;
+    }
+
+    button, input, textarea {
+      font: inherit;
+    }
+
+    button {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app {
+      width: min(100%, 520px);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: max(18px, env(safe-area-inset-top)) 16px max(96px, calc(82px + env(safe-area-inset-bottom)));
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
+    .brand {
+      display: grid;
+      gap: 3px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.05;
+      font-weight: 760;
+    }
+
+    .brand p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .time {
+      min-width: 84px;
+      text-align: right;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .panel {
+      background: rgba(255, 250, 240, 0.82);
+      border: 1px solid rgba(221, 213, 198, 0.9);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+
+    .mode-kicker {
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--accent-dark);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .mode-title {
+      margin: 18px 0 8px;
+      font-size: 30px;
+      line-height: 1.12;
+      font-weight: 780;
+    }
+
+    .mode-copy {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    .primary-action, .secondary-action, .danger-action {
+      width: 100%;
+      min-height: 58px;
+      border: 0;
+      border-radius: 8px;
+      padding: 15px 17px;
+      font-weight: 760;
+      font-size: 17px;
+      cursor: pointer;
+    }
+
+    .primary-action {
+      background: var(--accent);
+      color: white;
+    }
+
+    .primary-action:active {
+      background: var(--accent-dark);
+      transform: translateY(1px);
+    }
+
+    .secondary-action {
+      background: var(--soft);
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .danger-action {
+      background: #f2d6cc;
+      color: var(--warn);
+      border: 1px solid #e7c3b6;
+    }
+
+    .stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .routine {
+      display: grid;
+      gap: 10px;
+      margin: 14px 0 4px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 52px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.42);
+      padding: 10px 12px;
+    }
+
+    .check-row input {
+      width: 24px;
+      height: 24px;
+      accent-color: var(--accent);
+      flex: 0 0 auto;
+    }
+
+    .check-row span {
+      font-size: 16px;
+      font-weight: 650;
+    }
+
+    .small-note {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: grid;
+      gap: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 720;
+    }
+
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.72);
+      color: var(--ink);
+      padding: 13px 12px;
+      outline: none;
+      font-size: 16px;
+    }
+
+    textarea {
+      min-height: 92px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    input:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(47, 111, 115, 0.14);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .settings-group {
+      display: grid;
+      gap: 12px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .settings-group:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .settings-group h2, .history h2 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .history {
+      display: grid;
+      gap: 12px;
+    }
+
+    .history-item {
+      display: grid;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.48);
+      padding: 13px;
+    }
+
+    .history-date {
+      font-weight: 780;
+      font-size: 15px;
+    }
+
+    .history-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
+    .empty {
+      padding: 18px;
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.45;
+    }
+
+    nav {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: min(100%, 520px);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 10px 12px max(10px, env(safe-area-inset-bottom));
+      background: rgba(247, 243, 234, 0.92);
+      border-top: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+    }
+
+    .tab {
+      min-height: 48px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 760;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: var(--quiet);
+      border-color: var(--line);
+      color: var(--ink);
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(76px + env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      width: min(calc(100% - 32px), 488px);
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #24231f;
+      color: white;
+      font-size: 14px;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 360px) {
+      .app {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .mode-title {
+        font-size: 27px;
+      }
+
+      .primary-action, .secondary-action, .danger-action {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="brand">
+        <h1>Quiet Start</h1>
+        <p>지금 할 것 하나</p>
+      </div>
+      <div class="time" id="nowText"></div>
+    </header>
+
+    <section id="home" class="section active">
+      <div class="panel">
+        <div class="mode-kicker" id="modeName">오늘</div>
+        <h2 class="mode-title" id="modeTitle">지금 할 것 하나</h2>
+        <p class="mode-copy" id="modeCopy"></p>
+        <div class="stack" id="modeActions"></div>
+        <p class="small-note" id="modeHint"></p>
+      </div>
+    </section>
+
+    <section id="note" class="section">
+      <div class="panel stack">
+        <div class="field">
+          <label for="goodThing">오늘 좋았던 것</label>
+          <textarea id="goodThing" placeholder="한 줄이면 충분합니다."></textarea>
+        </div>
+        <div class="field">
+          <label for="leakTime">시간이 샌 구간</label>
+          <textarea id="leakTime" placeholder="언제 폰이 나를 데려갔나요?"></textarea>
+        </div>
+        <div class="field">
+          <label for="tomorrowFix">내일 하나만 고칠 것</label>
+          <textarea id="tomorrowFix" placeholder="딱 하나만 적습니다."></textarea>
+        </div>
+        <button class="primary-action" id="saveJournalBtn">오늘 노트 저장</button>
+      </div>
+    </section>
+
+    <section id="settings" class="section">
+      <div class="panel">
+        <div class="settings-group">
+          <h2>시간 기준</h2>
+          <div class="two-col">
+            <div class="field">
+              <label for="wakeTime">기상</label>
+              <input id="wakeTime" type="time">
+            </div>
+            <div class="field">
+              <label for="commuteTime">출근</label>
+              <input id="commuteTime" type="time">
+            </div>
+            <div class="field">
+              <label for="leaveTime">퇴근</label>
+              <input id="leaveTime" type="time">
+            </div>
+            <div class="field">
+              <label for="sleepTime">취침</label>
+              <input id="sleepTime" type="time">
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h2>루틴 링크</h2>
+          <div class="field">
+            <label for="meditationLink">명상 유튜브</label>
+            <input id="meditationLink" type="url" placeholder="https://...">
+          </div>
+          <div class="field">
+            <label for="stretchLink">스트레칭</label>
+            <input id="stretchLink" type="url" placeholder="https://...">
+          </div>
+          <div class="field">
+            <label for="cardioLink">가벼운 유산소</label>
+            <input id="cardioLink" type="url" placeholder="https://...">
+          </div>
+          <div class="field">
+            <label for="sleepMeditationLink">수면 명상</label>
+            <input id="sleepMeditationLink" type="url" placeholder="https://...">
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <h2>NotebookLM 월-금</h2>
+          <div class="field">
+            <label for="caseMon">월요일 판례 링크</label>
+            <input id="caseMon" type="url" placeholder="https://...">
+          </div>
+          <div class="field">
+            <label for="caseTue">화요일 판례 링크</label>
+            <input id="caseTue" type="url" placeholder="https://...">
+          </div>
+          <div class="field">
+            <label for="caseWed">수요일 판례 링크</label>
+            <input id="caseWed" type="url" placeholder="https://...">
+          </div>
+          <div class="field">
+            <label for="caseThu">목요일 판례 링크</label>
+            <input id="caseThu" type="url" placeholder="https://...">
+          </div>
+          <div class="field">
+            <label for="caseFri">금요일 판례 링크</label>
+            <input id="caseFri" type="url" placeholder="https://...">
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <button class="primary-action" id="saveSettingsBtn">설정 저장</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="history" class="section">
+      <div class="panel history">
+        <h2>기록</h2>
+        <div id="historyList"></div>
+        <button class="danger-action" id="deleteHistoryBtn">모든 기록 삭제</button>
+      </div>
+    </section>
+  </main>
+
+  <nav aria-label="앱 메뉴">
+    <button class="tab active" data-tab="home">오늘</button>
+    <button class="tab" data-tab="note">노트</button>
+    <button class="tab" data-tab="settings">설정</button>
+    <button class="tab" data-tab="history">기록</button>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORE_KEY = "quietStart.v1";
+    const dayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+    const weekdayLabels = {
+      mon: "월요일",
+      tue: "화요일",
+      wed: "수요일",
+      thu: "목요일",
+      fri: "금요일"
+    };
+
+    const defaults = {
+      settings: {
+        wakeTime: "05:00",
+        commuteTime: "07:30",
+        leaveTime: "18:30",
+        sleepTime: "22:30",
+        meditationLink: "",
+        stretchLink: "",
+        cardioLink: "",
+        sleepMeditationLink: "",
+        notebook: {
+          mon: "",
+          tue: "",
+          wed: "",
+          thu: "",
+          fri: ""
+        }
+      },
+      records: {}
+    };
+
+    let state = loadState();
+    let weekendChoiceIndex = 0;
+
+    const $ = (id) => document.getElementById(id);
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORE_KEY));
+        return mergeState(defaults, saved || {});
+      } catch (error) {
+        return structuredClone(defaults);
+      }
+    }
+
+    function mergeState(base, saved) {
+      return {
+        settings: {
+          ...base.settings,
+          ...(saved.settings || {}),
+          notebook: {
+            ...base.settings.notebook,
+            ...((saved.settings && saved.settings.notebook) || {})
+          }
+        },
+        records: saved.records || {}
+      };
+    }
+
+    function saveState() {
+      localStorage.setItem(STORE_KEY, JSON.stringify(state));
+    }
+
+    function todayKey() {
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const dd = String(now.getDate()).padStart(2, "0");
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function todayRecord() {
+      const key = todayKey();
+      if (!state.records[key]) {
+        state.records[key] = {
+          routine: { meditation: false, stretch: false, cardio: false },
+          weekend: { walk: false, read: false, callMom: false },
+          caseMemo: "",
+          journal: { good: "", leak: "", fix: "" }
+        };
+      }
+      ensureRecordShape(state.records[key]);
+      return state.records[key];
+    }
+
+    function ensureRecordShape(record) {
+      record.routine = {
+        meditation: false,
+        stretch: false,
+        cardio: false,
+        ...(record.routine || {})
+      };
+      record.weekend = {
+        walk: false,
+        read: false,
+        callMom: false,
+        ...(record.weekend || {})
+      };
+      record.journal = {
+        good: "",
+        leak: "",
+        fix: "",
+        ...(record.journal || {})
+      };
+    }
+
+    function minutes(time) {
+      const parts = String(time || "00:00").split(":").map(Number);
+      return parts[0] * 60 + parts[1];
+    }
+
+    function currentMinutes() {
+      const now = new Date();
+      return now.getHours() * 60 + now.getMinutes();
+    }
+
+    function addMinutes(time, amount) {
+      return (minutes(time) + amount + 1440) % 1440;
+    }
+
+    function isBetween(value, start, end) {
+      if (start <= end) return value >= start && value < end;
+      return value >= start || value < end;
+    }
+
+    function getMode() {
+      const now = new Date();
+      const day = now.getDay();
+      if (day === 0 || day === 6) return "weekend";
+
+      const s = state.settings;
+      const current = currentMinutes();
+      const wake = minutes(s.wakeTime);
+      const commute = minutes(s.commuteTime);
+      const leave = minutes(s.leaveTime);
+      const sleep = minutes(s.sleepTime);
+      const commuteEnd = addMinutes(s.commuteTime, 75);
+
+      if (isBetween(current, wake, commute)) return "morning";
+      if (isBetween(current, commute, commuteEnd)) return "commute";
+      if (isBetween(current, commuteEnd, leave)) return "work";
+      if (isBetween(current, leave, sleep)) return "recovery";
+      return "night";
+    }
+
+    function openUrl(url) {
+      if (!url) {
+        showToast("설정에 링크를 먼저 저장해 주세요.");
+        switchTab("settings");
+        return;
+      }
+      window.open(url, "_blank", "noopener");
+    }
+
+    function renderHome() {
+      const mode = getMode();
+      const record = todayRecord();
+      const actions = $("modeActions");
+      actions.innerHTML = "";
+
+      const addButton = (text, className, onClick) => {
+        const button = document.createElement("button");
+        button.className = className;
+        button.type = "button";
+        button.textContent = text;
+        button.addEventListener("click", onClick);
+        actions.appendChild(button);
+      };
+
+      const setHeader = (name, title, copy, hint) => {
+        $("modeName").textContent = name;
+        $("modeTitle").textContent = title;
+        $("modeCopy").textContent = copy;
+        $("modeHint").textContent = hint || "";
+      };
+
+      if (mode === "morning") {
+        setHeader("새벽 리셋", "물 한 컵, 그리고 몸을 깨우기", "폰을 보는 대신 순서를 짧게 닫습니다. 체크는 기록에 바로 남습니다.", "권장 흐름: 물 한 컵 → 3분 명상 → 5분 스트레칭 → 10분 유산소");
+        addRoutineChecklist(record);
+        addButton("3분 명상 열기", "primary-action", () => openUrl(state.settings.meditationLink));
+        addButton("다음: 스트레칭", "secondary-action", () => openUrl(state.settings.stretchLink));
+        return;
+      }
+
+      if (mode === "commute") {
+        const dayKey = dayKeys[new Date().getDay()];
+        const link = state.settings.notebook[dayKey] || "";
+        const label = weekdayLabels[dayKey] || "오늘";
+        setHeader("출근길", `${label} 판례 오디오`, "YouTube 대신 NotebookLM 판례 대화형 오디오나 요약으로 바로 들어갑니다.", "들은 뒤 한 줄만 남기면 기록에 저장됩니다.");
+        addButton("오늘 판례 열기", "primary-action", () => openUrl(link));
+        const memo = document.createElement("textarea");
+        memo.id = "caseMemo";
+        memo.placeholder = "들은 뒤 한 줄 메모";
+        memo.value = record.caseMemo || "";
+        memo.addEventListener("input", () => {
+          todayRecord().caseMemo = memo.value;
+          saveState();
+        });
+        actions.appendChild(memo);
+        return;
+      }
+
+      if (mode === "work") {
+        setHeader("업무", "오늘 핵심 업무 1개", "많이 적지 않습니다. 오늘의 중심 하나만 남깁니다.", "");
+        const input = document.createElement("textarea");
+        input.placeholder = "예: 선하증권 면책 쟁점 검토 40분";
+        input.value = record.workFocus || "";
+        input.addEventListener("input", () => {
+          todayRecord().workFocus = input.value;
+          saveState();
+        });
+        actions.appendChild(input);
+        addButton("저장", "primary-action", () => showToast("오늘의 핵심 업무를 저장했습니다."));
+        return;
+      }
+
+      if (mode === "recovery") {
+        setHeader("퇴근 후 회복", "아이와 식사부터", "이 시간의 목표는 더 잘하는 것이 아니라, 덜 흩어지는 것입니다.", "폰은 20분만. 밤에는 5분 수면 명상으로 닫습니다.");
+        addButton("폰 20분 타이머 시작", "primary-action", startPhoneTimer);
+        addButton("5분 수면 명상 열기", "secondary-action", () => openUrl(state.settings.sleepMeditationLink));
+        return;
+      }
+
+      if (mode === "weekend") {
+        renderWeekendMode(record, addButton, setHeader);
+        return;
+      }
+
+      setHeader("밤", "하루를 짧게 닫기", "내일을 고치려고 길게 쓰지 말고, 하나만 적습니다.", "");
+      addButton("5분 수면 명상 열기", "primary-action", () => openUrl(state.settings.sleepMeditationLink));
+      addButton("오늘 노트 쓰기", "secondary-action", () => switchTab("note"));
+    }
+
+    function renderWeekendMode(record, addButton, setHeader) {
+      const tasks = [
+        { key: "walk", title: "산책 다녀오기", done: "산책 완료", copy: "밖으로 나가면 주말이 조금 덜 흐려집니다." },
+        { key: "read", title: "책 10분 읽기", done: "책읽기 완료", copy: "많이 읽지 말고, 다시 책 쪽으로 몸을 돌리는 정도면 충분합니다." },
+        { key: "callMom", title: "엄마와 통화하기", done: "통화 완료", copy: "짧아도 괜찮습니다. 안부를 먼저 건네는 시간이 핵심입니다." }
+      ];
+      const remaining = tasks.filter((task) => !record.weekend[task.key]);
+
+      if (!remaining.length) {
+        setHeader("주말", "오늘의 세 가지 완료", "산책, 책읽기, 엄마와 통화를 모두 기록했습니다. 이제 더 쌓지 말고 조용히 닫아도 됩니다.", "완료: 산책 · 책읽기 · 엄마와 통화");
+        addButton("오늘 노트 한 줄 남기기", "primary-action", () => switchTab("note"));
+        return;
+      }
+
+      const task = remaining[weekendChoiceIndex % remaining.length];
+      const doneLabels = tasks
+        .filter((item) => record.weekend[item.key])
+        .map((item) => item.done.replace(" 완료", ""))
+        .join(" · ");
+      const leftLabels = remaining.map((item) => item.done.replace(" 완료", "")).join(" · ");
+
+      setHeader("주말", task.title, task.copy, `완료: ${doneLabels || "아직 없음"} / 남은 것: ${leftLabels}`);
+      addButton(task.done, "primary-action", () => {
+        todayRecord().weekend[task.key] = true;
+        weekendChoiceIndex = 0;
+        saveState();
+        renderHome();
+        renderHistory();
+        showToast(`${task.done}로 기록했습니다.`);
+      });
+
+      if (remaining.length > 1) {
+        addButton("다른 것 먼저 보기", "secondary-action", () => {
+          weekendChoiceIndex += 1;
+          renderHome();
+        });
+      } else {
+        addButton("오늘 노트 쓰기", "secondary-action", () => switchTab("note"));
+      }
+    }
+
+    function addRoutineChecklist(record) {
+      const routine = document.createElement("div");
+      routine.className = "routine";
+      const items = [
+        ["meditation", "3분 명상 완료"],
+        ["stretch", "5분 스트레칭 완료"],
+        ["cardio", "10분 유산소 완료"]
+      ];
+
+      items.forEach(([key, label]) => {
+        const row = document.createElement("label");
+        row.className = "check-row";
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.checked = Boolean(record.routine[key]);
+        input.addEventListener("change", () => {
+          todayRecord().routine[key] = input.checked;
+          saveState();
+          showToast(input.checked ? "완료로 기록했습니다." : "완료 기록을 해제했습니다.");
+        });
+        const text = document.createElement("span");
+        text.textContent = label;
+        row.append(input, text);
+        routine.appendChild(row);
+      });
+
+      $("modeActions").appendChild(routine);
+    }
+
+    function startPhoneTimer() {
+      const end = Date.now() + 20 * 60 * 1000;
+      localStorage.setItem("quietStart.phoneTimerEnd", String(end));
+      showToast("20분 타이머를 시작했습니다.");
+    }
+
+    function renderNow() {
+      const now = new Date();
+      const formatter = new Intl.DateTimeFormat("ko-KR", {
+        weekday: "short",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+      $("nowText").textContent = formatter.format(now);
+    }
+
+    function loadSettingsForm() {
+      const s = state.settings;
+      ["wakeTime", "commuteTime", "leaveTime", "sleepTime", "meditationLink", "stretchLink", "cardioLink", "sleepMeditationLink"].forEach((id) => {
+        $(id).value = s[id] || "";
+      });
+      $("caseMon").value = s.notebook.mon || "";
+      $("caseTue").value = s.notebook.tue || "";
+      $("caseWed").value = s.notebook.wed || "";
+      $("caseThu").value = s.notebook.thu || "";
+      $("caseFri").value = s.notebook.fri || "";
+    }
+
+    function saveSettingsForm() {
+      const s = state.settings;
+      ["wakeTime", "commuteTime", "leaveTime", "sleepTime", "meditationLink", "stretchLink", "cardioLink", "sleepMeditationLink"].forEach((id) => {
+        s[id] = $(id).value.trim();
+      });
+      s.notebook.mon = $("caseMon").value.trim();
+      s.notebook.tue = $("caseTue").value.trim();
+      s.notebook.wed = $("caseWed").value.trim();
+      s.notebook.thu = $("caseThu").value.trim();
+      s.notebook.fri = $("caseFri").value.trim();
+      saveState();
+      renderHome();
+      showToast("설정을 저장했습니다.");
+    }
+
+    function loadJournalForm() {
+      const journal = todayRecord().journal;
+      $("goodThing").value = journal.good || "";
+      $("leakTime").value = journal.leak || "";
+      $("tomorrowFix").value = journal.fix || "";
+    }
+
+    function saveJournalForm() {
+      const journal = todayRecord().journal;
+      journal.good = $("goodThing").value.trim();
+      journal.leak = $("leakTime").value.trim();
+      journal.fix = $("tomorrowFix").value.trim();
+      saveState();
+      renderHistory();
+      showToast("오늘 노트를 저장했습니다.");
+    }
+
+    function renderHistory() {
+      const list = $("historyList");
+      const keys = Object.keys(state.records).sort().reverse();
+      list.innerHTML = "";
+      if (!keys.length) {
+        list.innerHTML = '<div class="empty">아직 기록이 없습니다.</div>';
+        return;
+      }
+
+      keys.forEach((date) => {
+        const record = state.records[date];
+        ensureRecordShape(record);
+        const done = record.routine || {};
+        const weekend = record.weekend || {};
+        const item = document.createElement("article");
+        item.className = "history-item";
+        item.innerHTML = `
+          <div class="history-date">${date}</div>
+          <p class="history-text">아침: 명상 ${mark(done.meditation)} · 스트레칭 ${mark(done.stretch)} · 유산소 ${mark(done.cardio)}</p>
+          <p class="history-text">주말: 산책 ${mark(weekend.walk)} · 책읽기 ${mark(weekend.read)} · 엄마와 통화 ${mark(weekend.callMom)}</p>
+          <p class="history-text">판례 메모: ${escapeHtml(record.caseMemo || "없음")}</p>
+          <p class="history-text">핵심 업무: ${escapeHtml(record.workFocus || "없음")}</p>
+          <p class="history-text">좋았던 것: ${escapeHtml((record.journal && record.journal.good) || "없음")}</p>
+          <p class="history-text">샌 시간: ${escapeHtml((record.journal && record.journal.leak) || "없음")}</p>
+          <p class="history-text">내일 하나: ${escapeHtml((record.journal && record.journal.fix) || "없음")}</p>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function mark(value) {
+      return value ? "완료" : "미완료";
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function deleteHistory() {
+      const ok = confirm("모든 기록을 삭제할까요? 설정은 유지됩니다.");
+      if (!ok) return;
+      state.records = {};
+      saveState();
+      renderHome();
+      loadJournalForm();
+      renderHistory();
+      showToast("기록을 삭제했습니다.");
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll(".section").forEach((section) => {
+        section.classList.toggle("active", section.id === tabName);
+      });
+      document.querySelectorAll(".tab").forEach((tab) => {
+        tab.classList.toggle("active", tab.dataset.tab === tabName);
+      });
+      if (tabName === "home") renderHome();
+      if (tabName === "note") loadJournalForm();
+      if (tabName === "settings") loadSettingsForm();
+      if (tabName === "history") renderHistory();
+    }
+
+    let toastTimer;
+    function showToast(message) {
+      const toast = $("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2100);
+    }
+
+    document.querySelectorAll(".tab").forEach((tab) => {
+      tab.addEventListener("click", () => switchTab(tab.dataset.tab));
+    });
+
+    $("saveSettingsBtn").addEventListener("click", saveSettingsForm);
+    $("saveJournalBtn").addEventListener("click", saveJournalForm);
+    $("deleteHistoryBtn").addEventListener("click", deleteHistory);
+
+    renderNow();
+    loadSettingsForm();
+    loadJournalForm();
+    renderHome();
+    renderHistory();
+    setInterval(() => {
+      renderNow();
+      if ($("home").classList.contains("active")) renderHome();
+    }, 60000);
+  </script>
+</body>
+</html>
